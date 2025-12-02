@@ -1,8 +1,6 @@
-
-
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import datetime, os
-import requests   # <-- aligned with other imports
+import requests
 
 app = Flask(__name__)
 
@@ -10,7 +8,12 @@ LOG_PATH = os.path.join("logs", "scammer.txt")
 
 def log_visit(notes=""):
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Get real client IP (fall back to remote_addr)
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+    if ip and "," in ip:
+        ip = ip.split(",")[0].strip()
+
     ua = request.headers.get("User-Agent")
     ref = request.headers.get("Referer")
     lang = request.headers.get("Accept-Language")
@@ -39,15 +42,18 @@ def log_visit(notes=""):
     with open(LOG_PATH, "a", encoding="utf-8") as f:
         f.write(log_line + "\n")
 
+
 @app.route("/")
 def home():
     log_visit(notes="home")
     return "<h1>Welcome to the Anti-Scam Training Hub</h1><p>This site logs visits for educational purposes.</p>"
 
+
 @app.route("/bait")
 def bait():
     log_visit(notes="bait")
     return "<h1 style='color:red;'>YOU GOT HACKED</h1><p>This is a training simulation.</p>"
+
 
 @app.route("/dashboard")
 def dashboard():
@@ -61,6 +67,16 @@ def dashboard():
         logs = []
 
     return render_template("dashboard.html", logs=logs, title="Dashboard")
+
+
+@app.route("/status")
+def status():
+    # Quick health check route
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+    if ip and "," in ip:
+        ip = ip.split(",")[0].strip()
+    return jsonify({"status": "running", "detected_ip": ip})
+
 
 if __name__ == "__main__":
     app.run(debug=True)
