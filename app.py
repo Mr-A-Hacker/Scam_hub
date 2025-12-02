@@ -5,9 +5,11 @@ app = Flask(__name__)
 
 LOG_PATH = os.path.join("logs", "scammer.txt")
 
+	import requests
+
 def log_visit(notes=""):
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    ip = request.remote_addr
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr)
     ua = request.headers.get("User-Agent")
     ref = request.headers.get("Referer")
     lang = request.headers.get("Accept-Language")
@@ -15,9 +17,21 @@ def log_visit(notes=""):
     path = request.path
     query = request.query_string.decode("utf-8", errors="ignore")
 
+    # Geolocation lookup
+    try:
+        geo = requests.get(f"http://ip-api.com/json/{ip}").json()
+        lat = geo.get("lat", "N/A")
+        lon = geo.get("lon", "N/A")
+        city = geo.get("city", "N/A")
+        region = geo.get("regionName", "N/A")
+        country = geo.get("country", "N/A")
+    except Exception:
+        lat = lon = city = region = country = "N/A"
+
     log_line = (
         f"{ts} | IP:{ip} | Method:{method} | Path:{path}?{query} | "
-        f"UA:{ua} | Ref:{ref} | Lang:{lang} | Notes:{notes}"
+        f"UA:{ua} | Ref:{ref} | Lang:{lang} | Notes:{notes} | "
+        f"Location:{city}, {region}, {country} | Coords:{lat},{lon}"
     )
 
     os.makedirs("logs", exist_ok=True)
