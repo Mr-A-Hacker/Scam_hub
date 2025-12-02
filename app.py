@@ -1,3 +1,5 @@
+
+
 from flask import Flask, request, render_template
 import datetime, os
 import requests   # <-- aligned with other imports
@@ -5,8 +7,6 @@ import requests   # <-- aligned with other imports
 app = Flask(__name__)
 
 LOG_PATH = os.path.join("logs", "scammer.txt")
-
-	import requests
 
 def log_visit(notes=""):
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -48,6 +48,7 @@ def home():
 def bait():
     log_visit(notes="bait")
     return "<h1 style='color:red;'>YOU GOT HACKED</h1><p>This is a training simulation.</p>"
+
 @app.route("/dashboard")
 def dashboard():
     logs = []
@@ -63,4 +64,3 @@ def dashboard():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
