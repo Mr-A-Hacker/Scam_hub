@@ -9,17 +9,27 @@ LOG_PATH = os.path.join("logs", "scammer.txt")
 def log_visit(notes=""):
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Get real client IP (fall back to remote_addr)
+    # Real client IP (proxy-safe)
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
     if ip and "," in ip:
         ip = ip.split(",")[0].strip()
 
+    # Core request info
     ua = request.headers.get("User-Agent")
     ref = request.headers.get("Referer")
     lang = request.headers.get("Accept-Language")
     method = request.method
     path = request.path
     query = request.query_string.decode("utf-8", errors="ignore")
+    full_url = request.url
+    scheme = request.scheme
+    remote_port = request.environ.get("REMOTE_PORT")
+
+    # Extra headers
+    encoding = request.headers.get("Accept-Encoding")
+    connection = request.headers.get("Connection")
+    content_type = request.headers.get("Content-Type")
+    host = request.headers.get("Host")
 
     # Geolocation lookup
     try:
@@ -29,13 +39,15 @@ def log_visit(notes=""):
         city = geo.get("city", "N/A")
         region = geo.get("regionName", "N/A")
         country = geo.get("country", "N/A")
+        isp = geo.get("isp", "N/A")
     except Exception:
-        lat = lon = city = region = country = "N/A"
+        lat = lon = city = region = country = isp = "N/A"
 
     log_line = (
-        f"{ts} | IP:{ip} | Method:{method} | Path:{path}?{query} | "
-        f"UA:{ua} | Ref:{ref} | Lang:{lang} | Notes:{notes} | "
-        f"Location:{city}, {region}, {country} | Coords:{lat},{lon}"
+        f"{ts} | IP:{ip}:{remote_port} | Method:{method} | URL:{full_url} | "
+        f"Scheme:{scheme} | Host:{host} | UA:{ua} | Ref:{ref} | Lang:{lang} | "
+        f"Encoding:{encoding} | Conn:{connection} | Content-Type:{content_type} | "
+        f"Notes:{notes} | Location:{city}, {region}, {country} | ISP:{isp} | Coords:{lat},{lon}"
     )
 
     os.makedirs("logs", exist_ok=True)
@@ -71,7 +83,6 @@ def dashboard():
 
 @app.route("/status")
 def status():
-    # Quick health check route
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
     if ip and "," in ip:
         ip = ip.split(",")[0].strip()
