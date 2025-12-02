@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template
 import datetime, os
+import requests   # <-- aligned with other imports
 
 app = Flask(__name__)
 
