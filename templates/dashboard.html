@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <h2>Recent Logs</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>IP</th>
+        <th>Method</th>
+        <th>Path</th>
+        <th>User-Agent</th>
+        <th>Referrer</th>
+        <th>Language</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in logs %}
+      <tr>
+        {% for field in entry %}
+        <td>{{ field }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
