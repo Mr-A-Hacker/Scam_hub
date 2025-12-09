@@ -2,13 +2,37 @@ table {
   border-collapse: collapse;
   width: 100%;
   margin-top: 1rem;
+  font-family: "Arial", sans-serif;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 th, td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
 }
 
 th {
   background: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+tr:hover {
+  background-color: #e6f0ff; /* Roblox-like hover highlight */
+  cursor: pointer;
+}
+
+.signup {
+  background-color: #ffe6e6 !important;
+  color: #cc0000;
+  font-weight: bold;
 }
